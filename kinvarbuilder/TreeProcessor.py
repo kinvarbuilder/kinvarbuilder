@@ -70,6 +70,7 @@ class TreeProcessor:
                                ":".join(self.varBuilder.outputVarnames))
 
         import array
+        # buffer for TTree.Fill(..)
         outputValues =  array.array("f", [ 0.0 ] * len(self.varBuilder.outputVarnames))
 
         #----------

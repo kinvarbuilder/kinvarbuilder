@@ -61,6 +61,9 @@ def CachingFunction(wrappedClass):
             if hasattr(self.wrappedObj,"getParents"):
                 return self.wrappedObj.getParents()
             else:
+                # TODO: this default implementation is dangerous,
+                #       everything except a four vector itself
+                #       depends on something
                 return []
 
         def __str__(self):

@@ -28,51 +28,54 @@ class VarBuilder:
 
     #----------------------------------------
 
-    def __init__(self, inputVectors, initialStateZcomponentKnown):
+    def __init__(self, inputVectors, initialStateZcomponentKnown, listOfFunctions = None):
         # @param initialStateZcomponentKnown is typically set to true for lepton
         # colliders and false for hadron colliders
 
         self.inputVectors = inputVectors
         self.initialStateZcomponentKnown = initialStateZcomponentKnown
 
-        self.listOfFunctions = []
-
-        # compile the list of functions to be applied
-        self.listOfFunctions.extend(
-            [
-            Mass,        # should NOT be used on single vectors ?
-            ### funcPt,      # should NOT be used on single vectors ?
-
-            DeltaPhi,
-
-            PtOverMass,
-
-            ]
-        )
-
-        if self.initialStateZcomponentKnown:
-            #----------
-            # lepton collider type quantities
-            #----------
-
-            self.listOfFunctions.extend([
-                Angle3D,
-            ])
-
+        if listOfFunctions != None:
+            # list of functions explicitly specified
+            self.listOfFunctions = list(listOfFunctions)
         else:
-            #----------
-            # hadron collider type quantities
-            #----------
 
-            self.listOfFunctions.extend([
-                AbsDeltaEta,
-                ### AbsEta,
+            self.listOfFunctions = []
 
-                # DEBUG
-                Angle3D,
+            # compile the list of functions to be applied
+            self.listOfFunctions.extend(
+                [
+                Mass,        # should NOT be used on single vectors ?
+                ### funcPt,      # should NOT be used on single vectors ?
 
+                DeltaPhi,
 
-            ])
+                PtOverMass,
+
+                ]
+            )
+
+            if self.initialStateZcomponentKnown:
+                #----------
+                # lepton collider type quantities
+                #----------
+
+                self.listOfFunctions.extend([
+                    Angle3D,
+                ])
+
+            else:
+                #----------
+                # hadron collider type quantities
+                #----------
+
+                self.listOfFunctions.extend([
+                    AbsDeltaEta,
+                    ### AbsEta,
+
+                    SumPt,
+
+                ])
 
     #----------------------------------------
 

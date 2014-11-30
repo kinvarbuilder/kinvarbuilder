@@ -32,10 +32,12 @@ class TreeProcessor:
 
     #----------------------------------------
 
-    def process(self, inputTree, outputTreeName, outputFileName = None, maxEvents = None,
-                # firstEvent = None,
-                progressCallback = None):
+    def makeTree(self, inputTree, outputTreeName, outputFileName = None, maxEvents = None,
+                 # firstEvent = None,
+                 progressCallback = None):
         """
+        produce a ROOT output tree
+
         :param inputTree: the tree from which the variables shall be calculated
         :param outputTreeName: must be specified: the name of the output tree produced
         :param outputFileName: optional: if given, a TFile is created and the generated tree is written

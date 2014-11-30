@@ -23,3 +23,4 @@ from .FourVector import FourVector
 from .VectorSum import VectorSum
 from .VarBuilder import VarBuilder
 from .TreeProcessor import TreeProcessor
+from .TreeReader import TreeReader

@@ -17,7 +17,7 @@
 # limitations under the License.
 
 
-from .kinvarbuilder import TreeReader
+from .TreeReader import TreeReader
 
 class TreeProcessor:
     """ reads an input tree and produces the additional output variables.

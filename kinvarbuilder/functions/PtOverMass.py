@@ -42,6 +42,9 @@ class PtOverMass:
 
         return self.vectors[0].getValue().Pt() / mass
 
+    def getParents(self):
+        return self.vectors
+
     @staticmethod
     def getNumArguments(maxNumArguments):
         return [ 2 ]

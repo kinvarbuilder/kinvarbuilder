@@ -117,25 +117,10 @@ class TreeProcessor:
 
     #----------------------------------------
 
-    def makeTree(self, inputTree, outputTreeName, outputFileName = None, firstEvent = 0, maxEvents = None,
+    def _makeOutput(self, inputTree, outputMaker, firstEvent = 0, maxEvents = None,
                  progressCallback = None):
-        """
-        produce a ROOT output tree
-
-        :param inputTree: the tree from which the variables shall be calculated
-        :param outputTreeName: must be specified: the name of the output tree produced
-        :param outputFileName: optional: if given, a TFile is created and the generated tree is written
-            to this file
-        :param maxEvents: process at most this number of events (unless it is None)
-        :param: firstEvent is the index of the first event to process (zero based)
-        :param progressCallback: a function taking the pointer to this class and the index (0 based) of
-         the event about to be processed
-        :return:
-        """
 
         treeReader = TreeReader(inputTree)
-
-        outputMaker = _RootTreeWriter(outputFileName, outputTreeName)
 
         #----------
         # determine the number of rows in the array to return
@@ -198,7 +183,28 @@ class TreeProcessor:
 
         outputMaker.finish()
 
-    #----------------------------------------    
+    #----------------------------------------
+
+    def makeTree(self, inputTree, outputTreeName, outputFileName = None, firstEvent = 0, maxEvents = None,
+                 progressCallback = None):
+        """
+        produce a ROOT output tree
+
+        :param inputTree: the tree from which the variables shall be calculated
+        :param outputTreeName: must be specified: the name of the output tree produced
+        :param outputFileName: optional: if given, a TFile is created and the generated tree is written
+            to this file
+        :param maxEvents: process at most this number of events (unless it is None)
+        :param: firstEvent is the index of the first event to process (zero based)
+        :param progressCallback: a function taking the pointer to this class and the index (0 based) of
+         the event about to be processed
+        :return:
+        """
+        outputMaker = _RootTreeWriter(outputFileName, outputTreeName)
+
+        self._makeOutput(inputTree, outputMaker, firstEvent, maxEvents, progressCallback)
+
+    #----------------------------------------
 
     def makeArray(self, inputTree, maxEvents = None,
                   firstEvent = 0,

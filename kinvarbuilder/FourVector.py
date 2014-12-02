@@ -51,26 +51,12 @@ class FourVector:
         # and we assume the mass is zero all the time
         # TODO: support a fixed mass value (e.g. for tau leptons or b jets)
 
-        ### self.varPt = array.array('f',[ 0 ])
-        ### self.varEta = array.array('f',[ 0 ])
-        ### self.varPhi = array.array('f',[ 0 ])
-
-        ### if isinstance(self.massName, float) or isinstance(self.massName, int):
-        ###     # a fixed mass value has been set
-        ###     self.varMass = array.array('f',[ self.massName ])
-        ### else:
-        ###     self.varMass = array.array('f',[ 0 ])
 
     #----------------------------------------
 
     def setTreeReader(self, treeReader):
         # TODO: we should watch out for overlaps of multiple fourvectors
         #       setting branches on the same variable
-
-        # self.branchPt = tree.SetBranchAddress(self.ptName, self.)
-        # tree.SetBranchAddress(self.ptName, self.varPt)
-        # tree.SetBranchAddress(self.etaName, self.varEta)
-        # tree.SetBranchAddress(self.phiName, self.varPhi)
 
         self.varPt = treeReader.getVar(self.ptName)
         self.varEta = treeReader.getVar(self.etaName)

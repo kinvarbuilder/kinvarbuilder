@@ -33,8 +33,15 @@ class DeltaPhi(VectorDifferenceQuantity):
 
     def getValue(self):
 
-        phi1 = self.vectors[0].getValue().Phi()
-        phi2 = self.vectors[1].getValue().Phi()
+        vecValues = [ vec.getValue() for vec in self.vectors ]
+
+        for vecVal in vecValues:
+            if vecVal == None:
+                return None
+
+
+        phi1 = vecValues[0].Phi()
+        phi2 = vecValues[1].Phi()
 
         diff = phi1 - phi2
 

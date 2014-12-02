@@ -26,4 +26,10 @@ class DeltaEta(VectorDifferenceQuantity):
         VectorDifferenceQuantity.__init__(self, vector1, vector2, True)
 
     def getValue(self):
-        return self.vectors[0].getValue().Eta() - self.vectors[1].getValue().Eta()
+        vecValues = [ vec.getValue() for vec in self.vectors ]
+
+        for vecVal in vecValues:
+            if vecVal == None:
+                return None
+
+        return vecValues[0].Eta() - vecValues[1].Eta()

@@ -30,7 +30,13 @@ class AbsDeltaEta(VectorDifferenceQuantity):
         VectorDifferenceQuantity.__init__(self, vector1, vector2, True)
 
     def getValue(self):
-        return abs(self.vectors[0].getValue().Eta() - self.vectors[1].getValue().Eta())
+        vecValues = [ vec.getValue() for vec in self.vectors ]
+
+        for vecVal in vecValues:
+            if vecVal == None:
+                return None
+
+        return abs(vecValues[0].Eta() - vecValues[1].Eta())
 
     def __str__(self):
         return "AbsDeltaEta(" + ", ".join(str(v) for v in self.vectors) +")"

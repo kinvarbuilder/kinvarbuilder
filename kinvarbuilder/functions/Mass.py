@@ -40,7 +40,11 @@ class Mass:
     #----------------------------------------
 
     def getValue(self):
-        return self.vectorSum.getValue().M()
+        vecVal = self.vectorSum.getValue()
+
+        if vecVal == None:
+            return None
+        return vecVal.M()
     
     #----------------------------------------
 

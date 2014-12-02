@@ -25,7 +25,14 @@ class FourVector:
 
     #----------------------------------------
 
-    def __init__(self, pt, eta, phi, mass = 0, name = None):
+    def __init__(self, pt, eta, phi, mass = 0, name = None, validExpr = None):
+        """
+
+        :param validExpr: if not None, this is a ROOT tree expression which
+          indicates if this vector is valid for a given event (nonzero value)
+          or not (zero value)
+        :return:
+        """
 
         # pt, eta, phi must contain names of variables in a ROOT TTree
         self.ptName  = pt
@@ -46,6 +53,8 @@ class FourVector:
         # the vector to hold the values
         import ROOT
         self.vector = ROOT.TLorentzVector()
+
+        self.validExpr = validExpr
 
         # if self.massName == None, this is a three vector
         # and we assume the mass is zero all the time
@@ -68,11 +77,20 @@ class FourVector:
         else:
             self.varMass = treeReader.getVar(self.massName)
 
+        if self.validExpr != None:
+            self.varValidExpr = treeReader.getVar(self.validExpr)
+        else:
+            self.varValidExpr = [ True ]
 
     #----------------------------------------
 
 
     def getValue(self):
+
+        if not self.varValidExpr[0]:
+            # this vector is not defined for the current event
+            return None
+
         # get the quantities from the tree
         self.vector.SetPtEtaPhiM(
                 self.varPt[0],

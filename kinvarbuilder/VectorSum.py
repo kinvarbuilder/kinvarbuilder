@@ -81,6 +81,11 @@ class VectorSum:
 
         for obj in self.inputObjects:
             vector = obj.getValue()
+
+            if vector == None:
+                # not defined for this event
+                return None
+
             self.vector += vector
 
         return self.vector

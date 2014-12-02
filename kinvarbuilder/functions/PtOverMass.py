@@ -38,9 +38,15 @@ class PtOverMass:
         # over the mass of both vectors combined. We should have a way
         # of specifying that the second vector should be taken
 
-        mass = (self.vectors[0].getValue() + self.vectors[1].getValue()).M()
+        vectorValues = [ vector.getValue() for vector in self.vectors ]
 
-        return self.vectors[0].getValue().Pt() / mass
+        for value in vectorValues:
+            if value == None:
+                return None
+
+        mass = (vectorValues[0] + vectorValues[1]).M()
+
+        return vectorValues[0].Pt() / mass
 
     def getParents(self):
         return self.vectors

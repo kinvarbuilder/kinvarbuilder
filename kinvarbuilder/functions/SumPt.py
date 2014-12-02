@@ -36,7 +36,14 @@ class SumPt:
         # over the mass of both vectors combined. We should have a way
         # of specifying that the second vector should be taken
 
-        return sum(vector.getValue().Pt() for vector in self.vectors)
+        vecValues = [ vec.getValue() for vec in self.vectors ]
+
+        for vecVal in vecValues:
+            if vecVal == None:
+                return None
+
+
+        return sum(vecVal.Pt() for vecVal in vecValues)
 
     def getParents(self):
         return self.vectors

@@ -131,3 +131,5 @@ class VarBuilder:
         # end of loop over functions to apply to the vector combinations
 
         self.outputVarnames = [ "out%02d" % index for index in range(len(self.outputScalars))]
+
+        self.outputVarDescriptions = [ str(outputScalar) for outputScalar in self.outputScalars ]

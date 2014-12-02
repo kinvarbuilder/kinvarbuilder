@@ -45,3 +45,6 @@ class DeltaPhi(VectorDifferenceQuantity):
             diff += 2 * math.pi
 
         return diff
+
+    def __str__(self):
+        return "DeltaPhi(" + ", ".join(str(v) for v in self.vectors) +")"

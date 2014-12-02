@@ -48,3 +48,6 @@ class SumPt:
 
         return range(2, maxNumArguments + 1)
 
+
+    def __str__(self):
+        return "SumPt(" + ", ".join(str(v) for v in self.vectors) +")"

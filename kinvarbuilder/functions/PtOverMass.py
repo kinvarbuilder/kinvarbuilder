@@ -48,3 +48,6 @@ class PtOverMass:
     @staticmethod
     def getNumArguments(maxNumArguments):
         return [ 2 ]
+
+    def __str__(self):
+        return "PtOverMass(" + ", ".join(str(v) for v in self.vectors) +")"

@@ -152,11 +152,7 @@ class TreeProcessor:
         #----------
         # loop over all lines of the data given
         #----------
-
-        for eventIndex in range(treeReader.numEvents):
-
-            if maxEvents != None and eventIndex >= maxEvents:
-                break
+        for eventIndex in range(firstEvent, endEvent):
 
             if progressCallback != None:
                 progressCallback(numEventsToProcess, eventIndex)

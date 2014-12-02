@@ -92,11 +92,14 @@ class VariableRanking:
 
     #----------------------------------------
 
-    def __init__(self, valuesSig, valuesBkg, weightColSig = None, weightColBkg = None, columnsToCompare = None):
+    def __init__(self, valuesSig, valuesBkg, weightColSig = None, weightColBkg = None, columnsToCompare = None,
+                 varDescriptions = None):
         """
         :param valuesSig: a numpy record array for the signal events
         :param valuesBkg: same as valuesSignal but for background
-        :param columnsToCompare if not None, restrict the comparison to the given columns
+        :param columnsToCompare: if not None, restrict the comparison to the given columns
+        :param variableDescriptions: if not None, specifies a mapping of output variable names to the string
+            to be printed instead
         """
 
         #----------
@@ -135,9 +138,16 @@ class VariableRanking:
 
         self.similarities = []
 
+        self.varDescriptions = []
+
         for colname in columnsToCompare:
             self.similarities.append(self.calcSimilarity(valuesSig[colname], valuesBkg[colname], weightsSig, weightsBkg))
 
+            varDescription = colname
+            if varDescriptions != None:
+                varDescription = varDescriptions.get(colname, colname)
+
+            self.varDescriptions.append(varDescription)
 
 
     #----------------------------------------
@@ -169,8 +179,10 @@ class VariableRanking:
         # reverse = True will make put the most dissimilar variable first
         indices.sort(key = lambda i: self.similarities[i], reverse = True)
 
+        maxWidth = max(len(name) for name in self.varDescriptions)
+
         for index in indices:
-            print >> os,"%-20s: %f" % (self.columns[index], self.similarities[index])
+            print >> os,"  %-*s : %f" % (maxWidth, self.varDescriptions[index], self.similarities[index])
 
 
 #----------------------------------------------------------------------

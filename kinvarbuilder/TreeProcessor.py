@@ -85,6 +85,49 @@ class _RootTreeWriter:
         return None
 
 
+
+#----------------------------------------------------------------------
+
+
+class _NumpyArrayMaker:
+
+
+    def setNumOutputEvents(self, numOutputEvents):
+        self.numOutputEvents = numOutputEvents
+
+    def setVariableNames(self, outputVarNames):
+        #----------
+        # create a record array
+        #----------
+        # see e.g. http://docs.scipy.org/doc/numpy/user/basics.rec.html
+
+        import numpy
+
+        # TODO: do we have to create an array of zeros or can we create
+        #       an uninitialized array ?
+
+        dtypes = [ (varname, 'f4') for varname in outputVarNames ]
+
+        self.retval = numpy.zeros(self.numOutputEvents, dtype = dtypes)
+
+        # row into the returned matrix
+        self.rowIndex = 0
+
+    def addEvent(self, values):
+        for index in range(len(values)):
+            self.retval[self.rowIndex][index] = values[index]
+
+        # prepare next iteration
+        self.rowIndex += 1
+
+
+    def finish(self):
+        # nothing to do here
+        pass
+
+    def getResult(self):
+        return self.retval
+
 #----------------------------------------------------------------------
 
 class TreeProcessor:
@@ -216,75 +259,8 @@ class TreeProcessor:
         :param: firstEvent is the index of the first event to process (zero based)
         """
 
-        treeReader = TreeReader(inputTree)
+        outputMaker = _NumpyArrayMaker()
 
-        #----------
-        # determine the number of rows in the array to return
-        #----------
-        if maxEvents != None:
-            endEvent = min(firstEvent + maxEvents, treeReader.numEvents)
-        else:
-            endEvent = treeReader.numEvents            
-
-        numEventsToProcess = endEvent - firstEvent
-
-        #----------
-        # create a record array
-        #----------
-        # see e.g. http://docs.scipy.org/doc/numpy/user/basics.rec.html
-
-        import numpy
-
-        # TODO: do we have to create an array of zeros or can we create
-        #       an uninitialized array ?
-
-        dtypes = [ (varname, 'f4') for varname in self.varBuilder.outputVarnames ]
-
-        retval = numpy.zeros(numEventsToProcess, dtype = dtypes)
-
-        #----------
-        # set the input tree
-        #----------
-
-        # (note that for the moment this is not thread safe)
-        for vector in self.varBuilder.inputVectors:
-            vector.setTreeReader(treeReader)
-
-
-        #----------
-        # loop over all lines of the data given
-        #----------
-
-        # row into the returned matrix
-        rowIndex = 0
-
-        for eventIndex in range(firstEvent, endEvent):
-
-
-            if maxEvents != None and eventIndex >= maxEvents:
-                break
-
-            if progressCallback != None:
-                progressCallback(maxEvents, eventIndex)
-
-            # read the event into memory
-            treeReader.getEvent(eventIndex)
-
-            # clear the caches from the previous event
-            for obj in self.varBuilder.outputScalars:
-                obj.newEvent()
-
-            # calculate the derived quantities
-            for index, derivedQuantity in enumerate(self.varBuilder.outputScalars):
-                retval[rowIndex][index] = derivedQuantity.getValue()
-
-            # TODO: add support for quantity not existing
-
-            # prepare next iteration
-            rowIndex += 1
-
-        # end of loop over all events in range
-
-        return retval
+        return self._makeOutput(inputTree, outputMaker, firstEvent, maxEvents, progressCallback)
 
     #----------------------------------------    

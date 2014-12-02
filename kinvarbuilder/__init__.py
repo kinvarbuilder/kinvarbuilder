@@ -24,3 +24,4 @@ from .VectorSum import VectorSum
 from .VarBuilder import VarBuilder
 from .TreeProcessor import TreeProcessor
 from .TreeReader import TreeReader
+from .VariableRanking import VariableRanking

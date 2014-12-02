@@ -78,7 +78,11 @@ class _RootTreeWriter:
             ROOT.gROOT.cd()
             self.fout.Close()
 
+    def getResult(self):
+        # it's better NOT to return the tree because it may be on the
+        # output file which has been closed already
 
+        return None
 
 
 #----------------------------------------------------------------------
@@ -179,6 +183,8 @@ class TreeProcessor:
 
         outputMaker.finish()
 
+        return outputMaker.getResult()
+
     #----------------------------------------
 
     def makeTree(self, inputTree, outputTreeName, outputFileName = None, firstEvent = 0, maxEvents = None,
@@ -198,7 +204,7 @@ class TreeProcessor:
         """
         outputMaker = _RootTreeWriter(outputFileName, outputTreeName)
 
-        self._makeOutput(inputTree, outputMaker, firstEvent, maxEvents, progressCallback)
+        return self._makeOutput(inputTree, outputMaker, firstEvent, maxEvents, progressCallback)
 
     #----------------------------------------
 

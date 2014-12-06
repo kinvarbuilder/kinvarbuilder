@@ -137,12 +137,19 @@ class TreeProcessor:
 
     #----------------------------------------
 
-    def __init__(self, varBuilder):
+    def __init__(self, varBuilder, undefValue = None):
+        """
+        :param undefValue: the value to be put into the output for undefined quantities
+         (e.g. import for ROOT tree output)
+        """
+        
 
         self.varBuilder = varBuilder
 
         self.spectatorExpressions = []
         self.spectatorOutputVariableNames = []
+
+        self.undefValue = undefValue
 
     #----------------------------------------
 
@@ -212,14 +219,25 @@ class TreeProcessor:
                 obj.newEvent()
 
             # add the quantities to the output object
-            outputMaker.addEvent(
+
+            values = [
+
                 # the fourvector based quantities
-                [ derivedQuantity.getValue() for derivedQuantity in self.varBuilder.outputScalars ] +
+                derivedQuantity.getValue() for derivedQuantity in self.varBuilder.outputScalars
+
+                ] + [
 
                 # the spectator functions
-                [ buffer[0] for buffer in spectatorBuffers ]
+                buffer[0] for buffer in spectatorBuffers
 
-            )
+                ]
+
+            # replace undefined values
+            for index in range(len(values)):
+                if values[index] == None:
+                    values[index] = self.undefValue
+
+            outputMaker.addEvent(values)
 
             # TODO: add support for quantity not existing
 

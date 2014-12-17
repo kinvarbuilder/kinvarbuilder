@@ -72,15 +72,36 @@ def maxCumulativeDifference(valuesSig, valuesBkg, weightsSig, weightsBkg):
 
     maxDiff = 0
 
+    # when we have lots of events with the same value,
+    # the sorting could be such that we first have
+    # all the background and then all the signal
+    # events which would look like that there is discrimination
+    # power in this region but there is not because
+    # we could not put a cut between signal and background
+    # (because the events have the same values here)
+
+    lastValue = None
+
     for index in indices:
         weight = getWeight(index)
+
+        value = getValue(index)
+
+        assert lastValue == None or value >= lastValue
+
         if isSignal(index):
             cumulativeSumSoFar += weight / sumWeightsSig
         else:
             cumulativeSumSoFar -= weight / sumWeightsBkg
 
         # update the maximum difference
-        maxDiff = max(maxDiff, abs(cumulativeSumSoFar))
+        # only update this if the value of the variable
+        # actually increased (see the discussion above)
+        if value > lastValue:
+            maxDiff = max(maxDiff, abs(cumulativeSumSoFar))
+
+        # prepare the next iteration
+        lastValue = value
 
 
     return maxDiff

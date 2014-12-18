@@ -20,6 +20,7 @@
 from .kinvarbuilder import CachingFunction, IllegalArgumentTypes
 
 from FourVector import FourVector
+from TransverseVector import TransverseVector, Vector2D
 
 
 @CachingFunction
@@ -28,29 +29,42 @@ class VectorSum:
 
         # check that all input objects are either FourVector or TransverseVector objects
 
-        self.allAreFourvectors = True
-        for vec in inputObjects:
-            if isinstance(vec, FourVector):
-                continue
+        if len(inputObjects) > 1:
+            for vec in inputObjects:
+                # for the moment we do not allow mixtures
+                # of FourVector and TransverseVector,
+                # just sums of FourVector
+                # or a single TransverseVector
+                if not isinstance(vec, FourVector):
+                    raise IllegalArgumentTypes()
 
-            if isinstance(vec, TransverseVector):
+            self.allAreFourvectors = True
+        else:
+            # allow one single vector to be a TransverseVector
+
+            if isinstance(inputObjects[0], FourVector):
+                self.allAreFourvectors = True
+            elif isinstance(inputObjects[0], TransverseVector):
                 self.allAreFourvectors = False
-                continue
-
-            # other type, don't know how to use this for a vector sum
-            raise IllegalArgumentTypes()
+            else:
+                # other type, don't know how to use this for a vector sum
+                raise IllegalArgumentTypes()
 
         # we can add FourVectors to FourVectors
         #
         # if we add a FourVector to a TransverseVector, we can only
-        # get a TransverseVector out
+        # get a TransverseVector out (the z components are ignored
+        # in the end)
 
         self.inputObjects = list(inputObjects)
 
-        # the vector to hold the sum
-        import ROOT
-        self.vector = ROOT.TLorentzVector()
-
+        if self.allAreFourvectors:
+            # the vector to hold the sum
+            import ROOT
+            self.vector = ROOT.TLorentzVector()
+        else:
+            # a single TransverseVector
+            self.vector = Vector2D()
 
     #----------------------------------------
     def getParents(self):
@@ -62,6 +76,9 @@ class VectorSum:
     def isFourVector(self):
         # @return true if the sum is s fourvector quantity (i.e. all input vectors
         # are fourvectors) or false if the sum is a transverse vector
+        #
+        # for the moment, we just build sums of FourVectors
+        # (while transverse vectors can be used as function arguments)
 
         return self.allAreFourvectors
 
@@ -76,17 +93,30 @@ class VectorSum:
     def getValue(self):
         # @return the sum of vectors of the current event
 
-        # sum the components by hand for the moment
-        self.vector.SetXYZT(0,0,0,0)
+        if self.allAreFourvectors:
 
-        for obj in self.inputObjects:
-            vector = obj.getValue()
+            # sum the components by hand for the moment
+            self.vector.SetXYZT(0,0,0,0)
+
+            for obj in self.inputObjects:
+                vector = obj.getValue()
+
+                if vector == None:
+                    # not defined for this event
+                    return None
+
+                self.vector += vector
+        else:
+            assert len(self.inputObjects) == 1
+
+            vector = self.inputObjects[0].getValue()
 
             if vector == None:
                 # not defined for this event
                 return None
-
-            self.vector += vector
+            
+            # self.vector += vector
+            self.vector = vector
 
         return self.vector
 

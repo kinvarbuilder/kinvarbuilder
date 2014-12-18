@@ -20,6 +20,7 @@
 from .kinvarbuilder import *
 
 from .FourVector import FourVector
+from .TransverseVector import TransverseVector
 from .VectorSum import VectorSum
 from .VarBuilder import VarBuilder
 from .TreeProcessor import TreeProcessor

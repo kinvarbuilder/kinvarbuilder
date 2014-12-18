@@ -17,7 +17,7 @@
 # limitations under the License.
 
 
-from ..kinvarbuilder import CachingFunction
+from ..kinvarbuilder import CachingFunction, IllegalArgumentTypes
 
 @CachingFunction
 class PtOverMass:

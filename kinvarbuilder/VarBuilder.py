@@ -71,6 +71,7 @@ class VarBuilder:
 
                 self.listOfFunctions.extend([
                     AbsDeltaEta,
+                    DeltaR,
                     ### AbsEta,
 
                     SumPt,

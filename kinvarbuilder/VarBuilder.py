@@ -76,6 +76,8 @@ class VarBuilder:
 
                     SumPt,
 
+                    TransverseMass,
+
                 ])
 
     #----------------------------------------

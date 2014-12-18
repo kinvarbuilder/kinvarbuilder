@@ -108,10 +108,19 @@ class VarBuilder:
                         print line
 
                     # produce vector sums of these
-                    sums = [
-                        [ VectorSum(group) for group in line ]
-                        for line in groups
-                    ]
+                    # note that some combinations of vectors
+                    # are not allowed
+                    sums = []
+                    for line in groups:
+                        thisLine = []
+                        try:
+                            for group in line:
+                                thisLine.append(VectorSum(group))
+                        except IllegalArgumentTypes,ex:
+                            thisLine = None
+
+                        if thisLine != None:
+                            sums.append(thisLine)
 
                     nSizedPartitions[numArguments] = sums
                 else:

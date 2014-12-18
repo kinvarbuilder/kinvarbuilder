@@ -18,6 +18,7 @@
 
 
 from .VectorDifferenceQuantity import VectorDifferenceQuantity
+from ..kinvarbuilder import IllegalArgumentTypes
 
 import math
 
@@ -25,6 +26,9 @@ class DeltaR(VectorDifferenceQuantity):
     """distance in (eta,phi) plane between vectors """
 
     def __init__(self, vector1, vector2):
+
+        if not hasattr(vector1, 'Eta') or not hasattr(vector2,'Eta'):
+            raise IllegalArgumentTypes()
 
         # no requirement on the input vectors to be
         # fourvectors

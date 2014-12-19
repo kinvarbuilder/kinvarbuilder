@@ -18,7 +18,7 @@
 
 #----------------------------------------------------------------------
 
-import sys
+import sys, os
 
 def maxCumulativeDifference(valuesSig, valuesBkg, weightsSig, weightsBkg):
     # from scipy.stats import ks_2samp
@@ -129,15 +129,15 @@ class VariableRanking:
 
         if weightColSig == None:
             # assume all weights are one
-            weightsSig = numpy.ones(len(valuesSig))
+            self.weightsSig = numpy.ones(len(valuesSig))
         else:
-            weightsSig = valuesSig[weightColSig]
+            self.weightsSig = valuesSig[weightColSig]
 
         if weightColBkg == None:
             # assume all weights are one
-            weightsBkg = numpy.ones(len(valuesBkg))
+            self.weightsBkg = numpy.ones(len(valuesBkg))
         else:
-            weightsBkg = valuesBkg[weightColBkg]
+            self.weightsBkg = valuesBkg[weightColBkg]
 
         #----------
         # find the variables to be compared
@@ -161,8 +161,16 @@ class VariableRanking:
 
         self.varDescriptions = []
 
+        self.valuesSig = []
+        self.valuesBkg = []
+        
+
         for colname in columnsToCompare:
-            self.similarities.append(self.calcSimilarity(valuesSig[colname], valuesBkg[colname], weightsSig, weightsBkg))
+            self.similarities.append(self.calcSimilarity(valuesSig[colname], valuesBkg[colname], self.weightsSig, self.weightsBkg))
+
+            # keep the signal and background values for generating a report later
+            self.valuesSig.append(valuesSig[colname])
+            self.valuesBkg.append(valuesBkg[colname])
 
             varDescription = colname
             if varDescriptions != None:
@@ -204,6 +212,151 @@ class VariableRanking:
 
         for index in indices:
             print >> os,"  %-*s : %f" % (maxWidth, self.varDescriptions[index], self.similarities[index])
+
+    #----------------------------------------
+
+    def plotVariableToImageFile(self, varIndex, foutName):
+
+        # determine the binning: take 50 bins from min to max
+        # (add some margin on the left and right)
+        values = list(self.valuesSig[varIndex]) + list(self.valuesBkg[varIndex])
+        xmin = min(values)
+        xmax = max(values)
+
+        numbins = 50
+        numbinsWithMargin = numbins + 2
+
+        binWidth = (xmax - xmin) / float(numbins)
+
+        # add some margin
+        xmid = 0.5 * (xmin + xmax)
+        
+        xmin = xmid - (numbinsWithMargin * binWidth) / 2.0
+        xmax = xmid + (numbinsWithMargin * binWidth) / 2.0
+
+        import ROOT
+
+        histoSig = ROOT.TH1F("",self.varDescriptions[varIndex],numbinsWithMargin, xmin, xmax)
+        histoBkg = ROOT.TH1F("",self.varDescriptions[varIndex],numbinsWithMargin, xmin, xmax)
+
+        histoSig.SetLineColor(ROOT.kRed)
+        histoBkg.SetLineColor(ROOT.kBlue)
+
+        histoSig.SetLineWidth(2)
+        histoBkg.SetLineWidth(2)
+
+        for values, weights, histo in (
+            (self.valuesSig[varIndex], self.weightsSig, histoSig),
+            (self.valuesBkg[varIndex], self.weightsBkg, histoBkg),
+            ):
+            for i in range(len(values)):
+                histo.Fill(values[i], weights[i])
+
+        # normalize histograms to unit are
+        for histo in (histoSig, histoBkg):
+            tot = histo.GetSum()
+            if tot > 0:
+                histo.Scale(1 / float(tot))
+
+        ymax = max(histoSig.GetMaximum(), histoBkg.GetMaximum()) * 1.1
+
+        histoSig.SetMaximum(ymax)
+        histoBkg.SetMaximum(ymax)
+
+        # TODO: can we prevent ROOT from drawing an actual window on the screen
+        canv = ROOT.TCanvas()
+
+        histoSig.Draw()
+        histoBkg.Draw("same")
+
+        canv.SaveAs(foutName)
+
+        canv.Close()
+        
+
+    #----------------------------------------
+
+    def writeHtmlReport(self,fout):
+        # sort by decreasing smilarity
+        indices = range(len(self.similarities))
+
+        # reverse = True will make put the most dissimilar variable first
+        indices.sort(key = lambda i: self.similarities[i], reverse = True)
+
+        # fout must be a file like object
+
+        print >> fout,"<html>"
+        print >> fout,"<head>"
+        print >> fout,"<title>variable ranking</title>"
+        print >> fout,"</head>"
+
+        print >> fout,"<body>"
+
+        print >> fout, "<h1>variable ranking</h1>"
+
+        #----------
+        # print an overview table
+        #----------
+        print >> fout, "<table>"
+        print >> fout, "<tr><th>dissimilarity rank</th><th>expression</th><th>dissimilarity</th></tr>"
+
+        for index,varIndex in enumerate(indices):
+
+            items = [ index + 1,
+                      ('<a href="#%d">' % (index + 1)) + self.varDescriptions[varIndex] + "</a>",
+                      self.similarities[varIndex],
+                      ]
+
+            print >> fout, "<tr>", "".join([ "<td>" + str(x) + "</td>" for x in items ]),"</tr>"
+        
+
+        print >> fout, "</table>"
+
+
+        #----------
+
+        import tempfile
+        workdir = tempfile.mkdtemp()
+
+        for index,varIndex in enumerate(indices):
+
+            varDescription = self.varDescriptions[varIndex]
+
+            print >> fout, "<hr/>"
+
+            # HTML anchor
+            print >> fout, '<a name="%d"/>' % (index + 1)
+
+            print >> fout, "<h2>" + varDescription + "</h2>"
+
+            print >> fout, "dissimilarity rank:",index + 1,"<br/>"
+            print >> fout, "dissimilarity:",self.similarities[varIndex],"<br/>"
+
+            fname = os.path.join(workdir, "%d.png" % varIndex)
+            self.plotVariableToImageFile(varIndex, fname)
+
+            # read the png file back
+            fin = open(fname)
+            imageData = fin.read()
+            fin.close()
+
+            os.unlink(fname)
+
+            # put the image as data URI directly into the html
+            import base64
+            print >> fout,'<img src="data:image/png;base64,%s" />' % base64.b64encode(imageData)
+            
+
+
+        # end of loop over all variables
+
+
+        print >> fout,"</body>"
+        print >> fout,"</html>"
+        
+        
+
+        
 
 
 #----------------------------------------------------------------------

@@ -6,7 +6,7 @@ collisions.
 
 ---
 
-## quick installation
+## Quick installation
 
 if you have setuptools installed, you can do:
 

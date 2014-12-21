@@ -18,48 +18,40 @@
 
 
 from .VectorDifferenceQuantity import VectorDifferenceQuantity
-from ..kinvarbuilder import IllegalArgumentTypes
+from ..kinvarbuilder import CachingFunction, IllegalArgumentTypes
 
-import math
+@CachingFunction
+class MeanEta(VectorDifferenceQuantity):
+    """ average pseudorapidity of two or more vectors, as a generalization
+    of the mean pseudorapidity proposed by Zeppenfeld et. al. in hep-ph/9605444"""
 
-class DeltaR(VectorDifferenceQuantity):
-    """distance in (eta,phi) plane between vectors """
+    def __init__(self, *vectors):
+        self.vectors = vectors
 
-    def __init__(self, vector1, vector2):
-
-        if not vector1.isFourVector() or not vector2.isFourVector():
-            raise IllegalArgumentTypes()
-
-        # no requirement on the input vectors to be
-        # fourvectors
-        VectorDifferenceQuantity.__init__(self, vector1, vector2, False)
+        for vector in self.vectors:
+            if not vector.isFourVector():
+                raise IllegalArgumentTypes()
 
     def getValue(self):
-
         vecValues = [ vec.getValue() for vec in self.vectors ]
 
         for vecVal in vecValues:
             if vecVal == None:
                 return None
 
+        sumEta = sum([ vec.Eta() for vec in vecValues ])
+        return sumEta / float(len(vecValues))
 
-        # calculate delta phi first
-        phi1 = vecValues[0].Phi()
-        phi2 = vecValues[1].Phi()
+    @staticmethod
+    def getNumArguments(maxNumArguments):
+        return range(2, maxNumArguments + 1)
 
-        dphi = phi1 - phi2
+    #----------------------------------------
+    def getParents(self):
+        return self.vectors
 
-        while dphi > math.pi:
-            dphi -= 2 * math.pi
-
-        while dphi <= - math.pi:
-            dphi += 2 * math.pi
-
-
-        # now add the eta contribution
-        deta = vecValues[0].Eta() - vecValues[1].Eta()
-
-        return math.sqrt(deta * deta + dphi * dphi)
-
+    #----------------------------------------
     def __str__(self):
-        return "DeltaR(" + ", ".join(str(v) for v in self.vectors) +")"
+        return "MeanEta(" + ",".join([ str(x) for x in self.vectors]) + ")"
+
+    #----------------------------------------

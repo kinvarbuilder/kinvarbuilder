@@ -27,7 +27,7 @@ class DeltaR(VectorDifferenceQuantity):
 
     def __init__(self, vector1, vector2):
 
-        if not hasattr(vector1, 'Eta') or not hasattr(vector2,'Eta'):
+        if not vector1.isFourVector() or not vector2.isFourVector():
             raise IllegalArgumentTypes()
 
         # no requirement on the input vectors to be

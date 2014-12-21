@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = 'kinvarbuilder',
@@ -13,7 +13,7 @@ setup(
     author_email = 'andre.holzner@gmail.com',
     description = 'A library for building kinematic variables systematically',
     long_description = '',
-    packages = ['kinvarbuilder'],
+    packages = find_packages(),
     include_package_data = True,
     platforms = 'any',
     classifiers = [
